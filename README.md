@@ -120,3 +120,7 @@ automatically.
 
 Read [Behind the scenes](BEHIND_THE_SCENES.md) for platform detection, vLLM
 Metal, container flags, logs, image builds, and model options.
+
+---
+
+[Back to the vLLM Zero to Hero overview](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-overview)
