@@ -48,8 +48,9 @@ cd vLLM-zero-to-hero-pt1
 
 The launcher detects the operating system and accelerator, explains what it is
 doing, and waits for the API to become ready. The first run takes longer because
-it installs any required software and downloads Qwen3.5-2B. Later starts reuse
-the downloaded files.
+it installs any required software and downloads the
+[RedHatAI/Qwen3.5-2B](https://huggingface.co/RedHatAI/Qwen3.5-2B) model. Later
+starts reuse the downloaded files.
 
 Success looks like this:
 

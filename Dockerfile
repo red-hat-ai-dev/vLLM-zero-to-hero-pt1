@@ -7,4 +7,4 @@ LABEL org.opencontainers.image.source="https://github.com/red-hat-ai-dev/vLLM-ze
 
 EXPOSE 8000
 ENTRYPOINT ["vllm", "serve"]
-CMD ["Qwen/Qwen3.5-2B", "--host", "0.0.0.0", "--port", "8000", "--served-model-name", "qwen3.5-2b", "--max-model-len", "8192"]
+CMD ["RedHatAI/Qwen3.5-2B", "--host", "0.0.0.0", "--port", "8000", "--served-model-name", "qwen3.5-2b", "--max-model-len", "8192"]
