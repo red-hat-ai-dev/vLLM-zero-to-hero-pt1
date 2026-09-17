@@ -1,6 +1,6 @@
 # vLLM Zero to Hero
 
-### *This is part one in a four part series. Follow the vLLM-zero-to-hero campaign path to learn more!*
+### *This is part one in a four part series. Follow the vLLM-zero-to-hero [campaign path](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-overview) to learn more!*
 
 Start a local, OpenAI-compatible AI API with one command. The launcher supports
 Apple Silicon Macs and Linux computers with NVIDIA, AMD, or Intel acceleration.
