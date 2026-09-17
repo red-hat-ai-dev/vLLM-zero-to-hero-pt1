@@ -36,8 +36,8 @@ Windows users can follow the Linux path from a compatible WSL2 environment.
 Open a terminal and run:
 
 ```bash
-git clone https://github.com/red-hat-ai-dev/vLLM-zero-to-hero.git
-cd vLLM-zero-to-hero
+git clone https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-pt1.git
+cd vLLM-zero-to-hero-pt1
 ```
 
 ## 2. Start vLLM
@@ -114,14 +114,11 @@ logs. Common causes are:
 Fix the reported problem and run `./run.sh` again. Failed starts are cleaned up
 automatically.
 
+## Need help?
 
-# TODO ADD SLACK CHANNEL
+If something is not working, [open an issue](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-pt1/issues/new)
+with what you tried and the error message.
 
-
-Read [Behind the scenes](BEHIND_THE_SCENES.md) for platform detection, vLLM
-Metal, container flags, logs, image builds, and model options.
-
-## Having some trouble? feel free to [create an issue](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-pt1/issues/new), or [open a pr](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-pt1/compare)!
 ---
 
 [Back to the vLLM Zero to Hero overview](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-overview)
