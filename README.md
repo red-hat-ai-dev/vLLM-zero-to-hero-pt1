@@ -22,7 +22,8 @@ The launcher supports:
   installs the official stable vLLM Metal environment automatically.
 - **Linux:** an x86-64 computer with Docker or Podman and a supported NVIDIA,
   AMD, or Intel accelerator. Accelerator access must already work inside the
-  container engine.
+  container engine. The Intel path is validated on Intel Arc Pro B-series
+  GPUs.
 
 NVIDIA users also need
 [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)

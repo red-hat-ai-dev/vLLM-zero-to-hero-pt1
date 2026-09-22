@@ -249,6 +249,9 @@ run_linux() {
 
   detect_accelerator
   echo "Detected Linux with $accelerator acceleration."
+  if [ "$accelerator" = "intel" ]; then
+    echo "Note: vLLM validates the Intel XPU path on Arc Pro B-series GPUs only."
+  fi
 
   select_engine
 
