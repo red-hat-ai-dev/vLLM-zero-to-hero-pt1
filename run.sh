@@ -16,7 +16,7 @@ backend=""
 metal_pid=""
 
 usage() {
-  echo "Usage: ./run.sh [nvidia|amd|metal]" >&2
+  echo "Usage: ./run.sh [nvidia|amd|metal|cpu]" >&2
 }
 
 error() {
@@ -242,7 +242,7 @@ check_port_free() {
 run_linux() {
   check_port_free
   case "$requested" in
-    auto|nvidia|amd) ;;
+    auto|nvidia|amd|cpu) ;;
     metal)
       error "vLLM Metal is available only on an Apple Silicon Mac."
       exit 1
@@ -281,6 +281,14 @@ run_linux() {
       set -- --device /dev/kfd --device /dev/dri --group-add video \
         --cap-add SYS_PTRACE --security-opt seccomp=unconfined
       ;;
+    cpu)
+      if [ "$(uname -m)" != "x86_64" ]; then
+        error "The CPU example currently requires an x86-64 Linux environment."
+        exit 1
+      fi
+      image="docker.io/vllm/vllm-openai-cpu:v0.28.0-x86_64"
+      set -- -e VLLM_CPU_KVCACHE_SPACE=1 -e VLLM_CPU_NUM_OF_RESERVED_CPU=1
+      ;;
     *)
       error "Unknown accelerator: $accelerator"
       usage
@@ -288,11 +296,17 @@ run_linux() {
       ;;
   esac
 
-  echo "Starting vLLM. The first run also downloads the model."
-  if ! "$engine" run -d --name "$name" "$@" --ipc=host \
+  set -- "$@" --ipc=host \
     -p "127.0.0.1:$port:8000" \
     -v "$volume:/root/.cache/huggingface" \
-    --label "$managed_label=true" "$image"; then
+    --label "$managed_label=true" "$image"
+  if [ "$accelerator" = "cpu" ]; then
+    set -- "$@" RedHatAI/Qwen3.5-2B --served-model-name "$served_model" \
+      --dtype bfloat16 --max-model-len 2048 --max-num-seqs 4 --enforce-eager
+  fi
+
+  echo "Starting vLLM. The first run also downloads the model."
+  if ! "$engine" run -d --name "$name" "$@"; then
     cleanup_partial_container
     error "$engine could not start the vLLM container."
     echo "Review the error above. A partial container created by this launcher was removed when present." >&2
@@ -346,7 +360,7 @@ install_metal() {
 run_macos() {
   case "$requested" in
     auto|metal) ;;
-    nvidia|amd)
+    nvidia|amd|cpu)
       error "$requested acceleration through this launcher requires Linux."
       echo "On Apple Silicon, run ./run.sh without an override to use Metal." >&2
       exit 1

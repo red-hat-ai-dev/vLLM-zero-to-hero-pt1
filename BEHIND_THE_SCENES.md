@@ -9,7 +9,8 @@ depends on the operating system.
 `run.sh` first checks the operating system:
 
 - On an Apple Silicon Mac, it runs vLLM natively with the vLLM Metal plugin.
-- On Linux, it starts a CUDA or ROCm container.
+- On Linux, it starts a CUDA or ROCm container. `./run.sh cpu` explicitly selects
+  the official vLLM CPU image in an x86-64 Linux environment, without GPU devices.
 
 Both paths listen only on `127.0.0.1:8000`, wait for `/v1/models` to respond,
 and expose the example model as `qwen3.5-2b`. Binding to `127.0.0.1` keeps the
@@ -74,6 +75,11 @@ The Linux path detects the accelerator and selects one of these images:
 | --- | --- | --- |
 | NVIDIA | `cuda` | `vllm/vllm-openai:v0.28.0` |
 | AMD | `rocm` | `vllm/vllm-openai-rocm:v0.28.0` |
+
+The CPU option uses `vllm/vllm-openai-cpu:v0.28.0-x86_64` directly. It serves
+`RedHatAI/Qwen3.5-2B` in BF16, with a 1 GiB KV cache, a 2,048-token context,
+and at most four concurrent requests. One physical CPU core is reserved for
+the API server. CPU is never selected automatically.
 
 The project image uses these defaults:
 

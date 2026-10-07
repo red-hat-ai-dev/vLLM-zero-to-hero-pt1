@@ -24,6 +24,19 @@ The launcher supports:
   or AMD accelerator. Accelerator access must already work inside the
   container engine.
 
+No GPU? An experimental CPU option is available in an x86-64 Linux environment
+with Docker or Podman. Use a recent CPU with AVX-512 and plan for 16 GB of RAM:
+
+```bash
+./run.sh cpu
+```
+
+This runs the same model and API on the CPU, with a shorter 2,048-token context
+and up to four concurrent requests. It is slower than GPU serving. The normal
+`./stop.sh` and `./cleanup.sh` commands still apply. CPU serving has been tried
+on AMD Ryzen; WSL2 and other container-host environments still need validation.
+Apple Silicon users should use the default Metal path.
+
 NVIDIA users also need
 [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 configured for their container engine. `nvidia-smi` confirms that the host
