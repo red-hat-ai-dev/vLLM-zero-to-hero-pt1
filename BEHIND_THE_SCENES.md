@@ -9,7 +9,7 @@ depends on the operating system.
 `run.sh` first checks the operating system:
 
 - On an Apple Silicon Mac, it runs vLLM natively with the vLLM Metal plugin.
-- On Linux, it starts a CUDA, ROCm, or XPU container.
+- On Linux, it starts a CUDA or ROCm container.
 
 Both paths listen only on `127.0.0.1:8000`, wait for `/v1/models` to respond,
 and expose the example model as `qwen3.5-2b`. Binding to `127.0.0.1` keeps the
@@ -74,7 +74,6 @@ The Linux path detects the accelerator and selects one of these images:
 | --- | --- | --- |
 | NVIDIA | `cuda` | `vllm/vllm-openai:v0.28.0` |
 | AMD | `rocm` | `vllm/vllm-openai-rocm:v0.28.0` |
-| Intel | `xpu` | `vllm/vllm-openai-xpu:v0.28.0` |
 
 The project image uses these defaults:
 
@@ -99,7 +98,7 @@ Podman must report the `nvidia.com/gpu=all` CDI device through `podman info` or
 `nvidia-ctk cdi list`; Docker must report its `nvidia` runtime. The second
 Podman check supports releases that can use CDI but omit resolved devices from
 `podman info`. If Podman is running without CDI but Docker is ready, Docker is
-selected automatically. For AMD and Intel, Podman remains the first choice.
+selected automatically. For AMD, Podman remains the first choice.
 
 Set `ENGINE` to choose one explicitly. An explicit engine must still pass the
 same NVIDIA capability check:
@@ -120,10 +119,6 @@ Override accelerator detection when necessary:
 
 ```bash
 ./run.sh amd
-```
-
-```bash
-./run.sh intel
 ```
 
 The launcher maps port 8000, shares host memory, and mounts the `vllm-models`
@@ -162,16 +157,6 @@ ROCm uses the Linux kernel device nodes and video group:
 --group-add video \
 --cap-add SYS_PTRACE \
 --security-opt seccomp=unconfined
-```
-
-### Intel
-
-XPU uses the Direct Rendering Infrastructure devices:
-
-```bash
---device /dev/dri:/dev/dri \
--v /dev/dri/by-path:/dev/dri/by-path \
---privileged
 ```
 
 Consult the [vLLM installation guide](https://docs.vllm.ai/en/latest/getting_started/installation/)
@@ -230,7 +215,7 @@ removed.
 
 ## Build the container images
 
-The GitHub Actions workflow publishes the `cuda`, `rocm`, and `xpu` image tags.
+The GitHub Actions workflow publishes the `cuda` and `rocm` image tags.
 It also publishes versioned tags such as `v0.1.0-cuda` when a matching Git tag
 triggers the workflow.
 
@@ -246,14 +231,6 @@ Build a ROCm image:
 docker build \
   --build-arg VLLM_IMAGE=docker.io/vllm/vllm-openai-rocm:v0.28.0 \
   -t vllm-zero-to-hero:rocm .
-```
-
-Build an XPU image:
-
-```bash
-docker build \
-  --build-arg VLLM_IMAGE=docker.io/vllm/vllm-openai-xpu:v0.28.0 \
-  -t vllm-zero-to-hero:xpu .
 ```
 
 ## Use another model
