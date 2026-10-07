@@ -3,7 +3,7 @@
 ### *This is part one in a three-part series with optional extra-credit lessons. Follow the vLLM-zero-to-hero [campaign path](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-overview) to learn more!*
 
 Start a local, OpenAI-compatible AI API with one command. The launcher supports
-Apple Silicon Macs and Linux computers with NVIDIA, AMD, or Intel acceleration.
+Apple Silicon Macs and Linux computers with NVIDIA or AMD acceleration.
 
 Want to know what the launcher is doing? Read
 [Behind the scenes](BEHIND_THE_SCENES.md).
@@ -20,10 +20,9 @@ The launcher supports:
 
 - **Apple Silicon:** an M-series Mac running macOS 15 or newer. The first run
   installs the official stable vLLM Metal environment automatically.
-- **Linux:** an x86-64 computer with Docker or Podman and a supported NVIDIA,
-  AMD, or Intel accelerator. Accelerator access must already work inside the
-  container engine. The Intel path is validated on Intel Arc Pro B-series
-  GPUs.
+- **Linux:** an x86-64 computer with Docker or Podman and a supported NVIDIA
+  or AMD accelerator. Accelerator access must already work inside the
+  container engine.
 
 NVIDIA users also need
 [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
