@@ -8,8 +8,6 @@ Apple Silicon Macs and Linux computers with NVIDIA, AMD, or Intel acceleration.
 Want to know what the launcher is doing? Read
 [Behind the scenes](BEHIND_THE_SCENES.md).
 
-See [tested support and validation](SUPPORT.md) for the exact platforms, versions, and remaining checks.
-
 ## Requirements
 
 Every computer needs:
@@ -97,7 +95,8 @@ Running `./stop.sh` when the server is already stopped is safe.
 
 Cleanup shows exactly what it will remove and asks for confirmation. It deletes
 the example model on a Mac, or the project model volume on Linux. The shared
-vLLM Metal environment is kept for the other lessons. Other Hugging Face models and container images are left alone.
+vLLM Metal environment is kept for the other lessons. Other Hugging Face models
+and container images are left alone.
 
 The next `./run.sh` downloads the required files. Use
 `./cleanup.sh --yes` only when you intentionally want to skip the confirmation.
