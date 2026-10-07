@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 
+script_dir="$(CDPATH='' cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/engine.sh
+. "$script_dir/scripts/engine.sh"
+managed_label="io.github.red-hat-ai-dev.vllm-zero-to-hero.managed"
+
 name="vllm-zero-to-hero"
 volume="vllm-models"
 temp_root="${TMPDIR:-/tmp}"
@@ -95,29 +100,7 @@ remove_managed_path() {
 }
 
 select_engine() {
-  if [ -n "${ENGINE:-}" ]; then
-    if ! command -v "$ENGINE" >/dev/null 2>&1; then
-      error "ENGINE is set to '$ENGINE', but that command was not found."
-      exit 1
-    fi
-    if ! "$ENGINE" info >/dev/null 2>&1; then
-      error "$ENGINE is installed but is not running."
-      echo "Start $ENGINE, then run ./cleanup.sh again." >&2
-      exit 1
-    fi
-    engine="$ENGINE"
-    return
-  fi
-
-  if command -v podman >/dev/null 2>&1 && podman info >/dev/null 2>&1; then
-    engine="podman"
-  elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-    engine="docker"
-  elif command -v podman >/dev/null 2>&1 || command -v docker >/dev/null 2>&1; then
-    error "A container engine is installed but is not running."
-    echo "Start Docker or Podman, then run ./cleanup.sh again." >&2
-    exit 1
-  fi
+  resolve_managed_engine "$name" "$managed_label" "${volume:-}"
 }
 
 remove_linux_volume() {
@@ -163,7 +146,6 @@ os="$(uname -s)"
 case "$os" in
   Darwin)
     echo "This will stop vLLM and permanently remove:"
-    describe_path "Metal environment" "$default_metal_venv"
     describe_path "example model" "$metal_model_cache"
     describe_path "example model locks" "$metal_model_locks"
     describe_path "temporary logs and state" "$state_dir"
@@ -189,6 +171,7 @@ echo
 echo "Other Hugging Face models and container images will not be removed."
 echo "The next ./run.sh will download the required files again."
 echo
+echo "The shared vLLM Metal environment is kept."
 confirm_cleanup
 
 script_dir="$(CDPATH='' cd "$(dirname "$0")" && pwd)"
@@ -205,7 +188,6 @@ else
 fi
 
 if [ "$os" = "Darwin" ]; then
-  remove_managed_path "Metal environment" "$default_metal_venv"
   remove_managed_path "example model" "$metal_model_cache"
   remove_managed_path "example model locks" "$metal_model_locks"
 else

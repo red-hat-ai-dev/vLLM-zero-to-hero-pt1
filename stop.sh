@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 
+script_dir="$(CDPATH='' cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/engine.sh
+. "$script_dir/scripts/engine.sh"
+managed_label="io.github.red-hat-ai-dev.vllm-zero-to-hero.managed"
+
 name="vllm-zero-to-hero"
 state_dir="${TMPDIR:-/tmp}/vllm-zero-to-hero"
 pid_file="$state_dir/metal.pid"
@@ -48,25 +53,14 @@ stop_metal() {
 }
 
 select_engine() {
-  if [ -n "${ENGINE:-}" ]; then
-    if ! command -v "$ENGINE" >/dev/null 2>&1; then
-      error "ENGINE is set to '$ENGINE', but that command was not found."
-      exit 1
-    fi
-    engine="$ENGINE"
-    return
-  fi
-
-  if command -v podman >/dev/null 2>&1 && podman info >/dev/null 2>&1; then
-    engine="podman"
-  elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-    engine="docker"
-  else
-    engine=""
-  fi
+  resolve_managed_engine "$name" "$managed_label" "${volume:-}"
 }
 
 if stop_metal; then
+  exit 0
+fi
+if [ "$(uname -s)" = Darwin ]; then
+  echo "vLLM Metal is already stopped."
   exit 0
 fi
 
