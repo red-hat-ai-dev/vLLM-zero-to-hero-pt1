@@ -34,7 +34,8 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/${{ github.repository }}
+          # Preserve the public package consumed by Parts 1 and 3.
+          images: ghcr.io/red-hat-ai-dev/vllm-zero-to-hero
           tags: |
             type=raw,value=${{ matrix.variant }}
             type=ref,event=tag,suffix=-${{ matrix.variant }}

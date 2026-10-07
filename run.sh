@@ -3,13 +3,14 @@ set -eu
 
 name="vllm-zero-to-hero"
 volume="vllm-models"
-port="8000"
+port="${PORT:-8000}"
 state_dir="${TMPDIR:-/tmp}/vllm-zero-to-hero"
 pid_file="$state_dir/metal.pid"
 log_file="$state_dir/metal.log"
 metal_venv="${VLLM_METAL_VENV:-$HOME/.venv-vllm-metal}"
 metal_model="mlx-community/Qwen3.5-2B-4bit"
 served_model="qwen3.5-2b"
+image_repo="${IMAGE_REPO:-ghcr.io/red-hat-ai-dev/vllm-zero-to-hero}"
 managed_label="io.github.red-hat-ai-dev.vllm-zero-to-hero.managed"
 backend=""
 metal_pid=""
@@ -68,10 +69,9 @@ backend_is_running() {
 }
 
 wait_until_ready() {
-  attempt=0
+  deadline=$(( $(date +%s) + 1800 ))
   printf "Waiting for vLLM"
-  until curl --fail --silent "http://127.0.0.1:$port/v1/models" >/dev/null 2>&1; do
-    attempt=$((attempt + 1))
+  until curl --connect-timeout 2 --max-time 5 --fail --silent "http://127.0.0.1:$port/v1/models" >/dev/null 2>&1; do
 
     if ! backend_is_running; then
       echo
@@ -81,7 +81,7 @@ wait_until_ready() {
       return 1
     fi
 
-    if [ "$attempt" -ge 360 ]; then
+    if [ "$(date +%s)" -ge "$deadline" ]; then
       echo
       error "vLLM did not become ready within 30 minutes."
       echo "Check your internet connection and available memory, then try again." >&2
@@ -94,6 +94,12 @@ wait_until_ready() {
     sleep 5
   done
 
+  if ! backend_is_running; then
+    error "vLLM stopped before it became ready."
+    show_recent_logs
+    cleanup_started_backend
+    return 1
+  fi
   echo
   trap - INT TERM HUP
   echo "vLLM is ready at http://127.0.0.1:$port/v1"
@@ -233,7 +239,15 @@ detect_accelerator() {
   fi
 }
 
+check_port_free() {
+  if curl --connect-timeout 2 --max-time 5 --silent --output /dev/null "http://127.0.0.1:$port/v1/models"; then
+    error "An HTTP server already answers on port $port. Stop it or choose PORT."
+    exit 1
+  fi
+}
+
 run_linux() {
+  check_port_free
   case "$requested" in
     auto|nvidia|amd|intel) ;;
     metal)
@@ -265,20 +279,20 @@ run_linux() {
 
   case "$accelerator" in
     nvidia)
-      image="ghcr.io/red-hat-ai-dev/vllm-zero-to-hero:cuda"
-      if [ "$engine" = "podman" ]; then
+      image="$image_repo:cuda"
+      if [ "${engine##*/}" = "podman" ]; then
         set -- --device nvidia.com/gpu=all --security-opt=label=disable
       else
         set -- --gpus all
       fi
       ;;
     amd)
-      image="ghcr.io/red-hat-ai-dev/vllm-zero-to-hero:rocm"
+      image="$image_repo:rocm"
       set -- --device /dev/kfd --device /dev/dri --group-add video \
         --cap-add SYS_PTRACE --security-opt seccomp=unconfined
       ;;
     intel)
-      image="ghcr.io/red-hat-ai-dev/vllm-zero-to-hero:xpu"
+      image="$image_repo:xpu"
       set -- --device /dev/dri:/dev/dri \
         -v /dev/dri/by-path:/dev/dri/by-path --privileged
       ;;
@@ -375,7 +389,7 @@ run_macos() {
   if [ -f "$pid_file" ]; then
     old_pid="$(cat "$pid_file" 2>/dev/null || true)"
     if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
-      if curl --fail --silent "http://127.0.0.1:$port/v1/models" >/dev/null 2>&1; then
+      if curl --connect-timeout 2 --max-time 5 --fail --silent "http://127.0.0.1:$port/v1/models" >/dev/null 2>&1; then
         echo "vLLM is already ready at http://127.0.0.1:$port/v1"
         return
       fi
@@ -386,6 +400,7 @@ run_macos() {
     rm -f "$pid_file"
   fi
 
+  check_port_free
   echo "Detected Apple Silicon."
   install_metal
 
