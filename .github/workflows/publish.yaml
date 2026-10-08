@@ -40,6 +40,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
+          file: scripts/Dockerfile
           push: true
           build-args: VLLM_IMAGE=${{ matrix.base }}
           tags: ${{ steps.meta.outputs.tags }}

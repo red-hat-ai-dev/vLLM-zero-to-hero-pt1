@@ -6,7 +6,7 @@ Start a local, OpenAI-compatible AI API with one command. The launcher supports
 Apple Silicon Macs and Linux computers with NVIDIA or AMD acceleration.
 
 Want to know what the launcher is doing? Read
-[Behind the scenes](BEHIND_THE_SCENES.md).
+[Behind the scenes](docs/BEHIND_THE_SCENES.md).
 
 ## Requirements
 
