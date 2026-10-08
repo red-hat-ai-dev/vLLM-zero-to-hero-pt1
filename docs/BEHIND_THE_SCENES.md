@@ -4,6 +4,20 @@ The launcher starts an OpenAI-compatible vLLM server. You use the same API and
 model name on every supported computer, but the way vLLM reaches the accelerator
 depends on the operating system.
 
+The [README](../README.md) is the walkthrough. This guide explains the pieces
+behind those commands.
+
+## What is in this repository?
+
+| File or folder | What it does |
+| --- | --- |
+| [`run.sh`](../run.sh) | Detects the platform, starts vLLM, and waits for the API. |
+| [`stop.sh`](../stop.sh) | Stops the server while keeping downloaded models. |
+| [`cleanup.sh`](../cleanup.sh) | Asks before removing this lesson's model cache and temporary state. |
+| [`scripts/Dockerfile`](../scripts/Dockerfile) | Defines the CUDA and ROCm serving images. |
+| [`scripts/engine.sh`](../scripts/engine.sh) | Finds which container engine owns the resources to stop or clean up. |
+| [`docs/`](.) | Holds this explanation. |
+
 ## What `run.sh` does
 
 `run.sh` first checks the operating system:
@@ -84,7 +98,7 @@ the API server. CPU is never selected automatically.
 The project image uses these defaults:
 
 ```bash
-vllm serve Qwen/Qwen3.5-2B \
+vllm serve RedHatAI/Qwen3.5-2B \
   --host 0.0.0.0 \
   --port 8000 \
   --served-model-name qwen3.5-2b \
@@ -186,6 +200,12 @@ partially created container before returning an error.
 Metal PID file exists; otherwise, it removes the Linux container. It succeeds
 quietly if neither one is running.
 
+`scripts/engine.sh` is a shell helper used by stop and cleanup. It checks which
+Podman or Docker engine owns the named container or model volume, and verifies
+the container's project label before removal. If separate project resources
+exist in both engines, it asks you to select `ENGINE` explicitly. A Docker
+command that is an alias for Podman can refer to the same resources.
+
 ## Complete local cleanup
 
 `./cleanup.sh` is for someone who wants to remove the local setup, not merely
@@ -197,7 +217,6 @@ non-interactive cleanup.
 On Apple Silicon, cleanup removes only these managed paths:
 
 ```text
-~/.venv-vllm-metal
 ~/.cache/huggingface/hub/models--mlx-community--Qwen3.5-2B-4bit
 ~/.cache/huggingface/hub/.locks/models--mlx-community--Qwen3.5-2B-4bit
 ${TMPDIR:-/tmp}/vllm-zero-to-hero
@@ -205,9 +224,8 @@ ${TMPDIR:-/tmp}/vllm-zero-to-hero
 
 If `HF_HOME` is set, the two model paths use that directory instead of
 `~/.cache/huggingface`. Cleanup does not remove the rest of the Hugging Face
-cache. If `VLLM_METAL_VENV` points to a custom environment, that custom path is
-reported and preserved; only the default environment managed by this project is
-removed.
+cache. The shared `~/.venv-vllm-metal` environment is kept so the other lessons
+can reuse it. A custom `VLLM_METAL_VENV` is also preserved.
 
 On Linux, cleanup removes the `vllm-zero-to-hero` container, the
 `vllm-models` volume, and temporary project state. The container image stays in
@@ -228,13 +246,14 @@ triggers the workflow.
 Build a CUDA image locally:
 
 ```bash
-docker build -t vllm-zero-to-hero:cuda .
+docker build -f scripts/Dockerfile -t vllm-zero-to-hero:cuda .
 ```
 
 Build a ROCm image:
 
 ```bash
 docker build \
+  -f scripts/Dockerfile \
   --build-arg VLLM_IMAGE=docker.io/vllm/vllm-openai-rocm:v0.28.0 \
   -t vllm-zero-to-hero:rocm .
 ```
@@ -256,3 +275,12 @@ docker run --rm --gpus all --ipc=host -p 127.0.0.1:8000:8000 \
 
 Set `HF_TOKEN` for a gated model and review its license before use. The example
 Qwen models use the Apache-2.0 license; details are in their model cards.
+
+## Tested support
+
+The [Part 1 RFC](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-pt1/issues/7)
+holds validation results, exact environments, and remaining platform checks.
+Use it to distinguish available launcher paths from hardware that has been
+tested.
+
+[Back to the walkthrough](../README.md)

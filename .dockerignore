@@ -2,5 +2,5 @@
 .github
 .gitignore
 README.md
-BEHIND_THE_SCENES.md
+docs
 *.sh
