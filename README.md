@@ -60,10 +60,10 @@ cd vLLM-zero-to-hero-pt1
 ```
 
 The launcher detects the operating system and accelerator, explains what it is
-doing, and waits for the API to become ready. The first run takes longer because
-it installs any required software and downloads the
-[RedHatAI/Qwen3.5-2B](https://huggingface.co/RedHatAI/Qwen3.5-2B) model. Later
-starts reuse the downloaded files.
+doing, and waits for the API to become ready. The first run installs any required
+software and downloads [RedHatAI/Qwen3.5-2B](https://huggingface.co/RedHatAI/Qwen3.5-2B)
+on Linux or [mlx-community/Qwen3.5-2B-4bit](https://huggingface.co/mlx-community/Qwen3.5-2B-4bit)
+on Apple Silicon. Later starts reuse the downloaded files.
 
 Success looks like this:
 
@@ -73,7 +73,7 @@ vLLM is ready at http://127.0.0.1:8000/v1
 
 ## 3. Send a request
 
-Keep vLLM running and use another terminal:
+Once the ready message appears, send this request from the same terminal.
 
 ```bash
 curl http://127.0.0.1:8000/v1/chat/completions \
@@ -135,5 +135,7 @@ If something is not working, [open an issue](https://github.com/red-hat-ai-dev/v
 with what you tried and the error message.
 
 ---
+
+After stopping the server, run `cd ..` from the Part 1 directory. Follow the clone instructions in [Part 2 — Optimize](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-pt2) from there.
 
 [Back to the vLLM Zero to Hero overview](https://github.com/red-hat-ai-dev/vLLM-zero-to-hero-overview)
